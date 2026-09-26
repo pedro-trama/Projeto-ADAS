@@ -12,10 +12,24 @@ Turma: 02D11
 #define REGISTROS 50 // Amostras registradas aleatoriamente
 
 int main(){
+    
     //Variáveis
+    
     float atrito;
     int sensibilidade;
     int op;
+
+    //Criação das matrizes
+
+    float velocidades[MAX_AMOSTRAS][2]; // Matriz das velocidades
+
+    float sensores_frontais[MAX_AMOSTRAS][3]; // Matriz sensores frontais
+
+    float sensores_laterais[MAX_AMOSTRAS][2]; // Matriz sensores laterais 
+
+    float processamento[MAX_AMOSTRAS][2]; // Matriz processamento
+
+    int status[MAX_AMOSTRAS][3]; // Matriz status
 
     //Entrada do valor do atrito
     printf("Insira o valor do atrito da via: ");
