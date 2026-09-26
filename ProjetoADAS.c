@@ -8,8 +8,8 @@ Turma: 02D11
 
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_AMOSTRAS 100 // Quantidade máxima de amostras
-#define REGISTROS 50 // Amostras registradas aleatoriamente
+#define MAX_AMOSTRAS (100) // Quantidade máxima de amostras
+#define REGISTROS (50) // Amostras registradas aleatoriamente
 
 int main(){
     
