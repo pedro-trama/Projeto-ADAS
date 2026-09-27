@@ -11,6 +11,14 @@ Turma: 02D11
 #define MAX_AMOSTRAS (100) // Quantidade máxima de amostras
 #define REGISTROS (50) // Amostras registradas aleatoriamente
 
+//Protótipo das funções
+
+//Função que recebe a matriz de sensores frontais e extrai a mediana
+void fusaoSensores(int n, float sensores[n][3], float process[n][2]);
+
+//Função que calcula a distancia de frenagem para cada amostra
+void calcularDistanciaSegura(int sens, float atrito, int n, float velocidades[n][2], float process[n][2]);
+
 int main(){
     
     //Variáveis
@@ -77,3 +85,60 @@ int main(){
 
     return 0;
 }
+
+//Função Fusão de Sensores
+void fusaoSensores(int n, float sensores[n][3], float process[n][2]){
+    int i, j, temp;
+
+    //Define um vetor que representa cada amostra por linha
+    for (i = 0; i < n; i++){
+        float vetor[3];
+
+        //Copia os elementos da linha atual
+        for (j = 0; j < 3; j++){
+            vetor[j] = sensores[i][j];
+        }
+
+        //Ordena os elementos usando o método de ordenação Bubble Sort
+        for (j = 0; j < 2; j++){
+            if(vetor[j] > vetor[j+1]){
+                temp = vetor[j];
+                vetor[j] = vetor[j+1];
+                vetor[j+1] = temp;
+            }
+        }
+
+        //Armazena a mediana na primeira coluna da matriz de processamento
+        process[i][0] = vetor[1];
+    }
+}
+
+//Função Cálculo de Distância Segura
+void calcularDistanciaSegura(int sens, float atrito, int n, float velocidades[n][2], float process[n][2]){
+    int i, j;
+    float tempo_reacao, vel_kmh, vel_ms, distancia;
+
+    //Verifica o tempo de reação conforme a sensibilidade do ADAS
+    if (sens == 1){
+        //1 - Esportivo
+        tempo_reacao = 1.0;
+    } else if(sens == 2){
+        //2 - Normal
+        tempo_reacao = 1.5;
+    } else {
+        //3 - Seguro
+        tempo_reacao = 2.0;
+    }
+    
+    //Percorre a matriz velocidades e converte cada amostra de km/h para m/s
+    for (i = 0; i < n; i++){
+        vel_kmh = velocidades[i][0];
+        vel_ms = vel_kmh / 3.6;
+
+        //Calcula a distância segura de frenagem
+        distancia = (vel_ms * tempo_reacao) + ((vel_ms * vel_ms) / (2 * atrito * 9.81));
+
+        //Armazena a distância na segunda coluna da matriz processamento
+        process[i][1] = distancia;
+    } 
+}  
