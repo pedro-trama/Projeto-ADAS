@@ -8,6 +8,7 @@ Turma: 02D11
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #define MAX_AMOSTRAS (100) // Quantidade máxima de amostras
 #define REGISTROS (50) // Amostras registradas aleatoriamente
 
@@ -33,6 +34,7 @@ void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][
 
 //Função principal do programa
 int main(){
+    srand(time(NULL));
     
     //Variáveis
     
@@ -67,7 +69,7 @@ int main(){
     //Estrutura de repetição do-while
     do{
         //Exibição do Menu
-        printf("========== MENU ==========");
+        printf("\n========== MENU ==========\n");
         printf("1 - Carregar dados iniciais\n");
         printf("2 - Inserir nova amostra\n");
         printf("3 - Processar e exibir relatório\n");
@@ -218,7 +220,7 @@ void assistenteFaixa(int n, float velocidades[n][2], float sensores_laterais[n][
         //Situação normal
         status[i][1] = 0;
         }
-
+}
 // Avaliação da Faixa Direita
         if (sensores_laterais[i][1] < margem) {
 
@@ -313,16 +315,16 @@ void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][
 
     //Imprime os dados de entrada
     for (i = 0; i < n; i++){
-        printf("========== AMOSTRA %d ==========", i);
+        printf("\n========== AMOSTRA %d ==========\n", i + 1);
 
         //Matriz velocidades
         printf("Velocidade atual: %.1f km/h\n", velocidades[i][0]);
         printf("Velocidade do veículo à frente: %.1f km/h\n", velocidades[i][1]);
 
         //Matriz sensores frontais
-        pritnf("Leitura do Radar: %.1f m\n", sensores_frontais[i][0]);
+        printf("Leitura do Radar: %.1f m\n", sensores_frontais[i][0]);
         printf("Leitura do Lidar: %.1f m\n", sensores_frontais[i][1]);
-        printf("Leitura da Câmera: %.1f m/\n", sensores_frontais[i][2]);
+        printf("Leitura da Câmera: %.1f m\n", sensores_frontais[i][2]);
 
         //Matriz sensores laterais
         printf("Distância da faixa esquerda: %.1f m\n", sensores_laterais[i][0]);
@@ -370,7 +372,7 @@ void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][
 
         //Decisão Geral do Sistema
         if ((status[i][0] == 2) || (status[i][1] == 2) || (status[i][2] == 2)){
-            printf("STATUS GERAL: INTERVENÇÃO CRIÍTICA EXIGIDA\n");
+            printf("STATUS GERAL: INTERVENÇÃO CRÍTICA EXIGIDA\n");
         } 
         else if ((status[i][0] == 1) || (status[i][1] == 1) || (status[i][2] == 1)){
             printf("STATUS GERAL: ATENÇÃO\n");
