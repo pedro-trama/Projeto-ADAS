@@ -29,7 +29,7 @@ void carregarDados(int n, float velocidades[n][2], float sensores_frontais[n][3]
 void analiseRiscoFrontal(int n, float velocidades[n][2], float processamento[n][2], int status[n][3]);
 
 //Função que exibe o relatório
-void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][3], float sensores_laterais[n][2], float processamento[n][2], float status[n][3]);
+void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][3], float sensores_laterais[n][2], float processamento[n][2], int status[n][3]);
 
 //Função principal do programa
 int main(){
@@ -39,6 +39,7 @@ int main(){
     float atrito;
     int sensibilidade;
     int op;
+    int quantidade_amostras = 0;
 
     //Criação das matrizes
 
@@ -79,21 +80,47 @@ int main(){
             //Carregar dados
             case 1:
                 carregarDados(REGISTROS, velocidades, sensores_frontais, sensores_laterais, processamento, status);
-                assistenteFaixa(REGISTROS, velocidades, sensores_laterais, status);
+
+                quantidade_amostras = REGISTROS;
+                
             break;
 
             //Inserir nova amostra
             case 2:
+
+                if(quantidade_amostras < MAX_AMOSTRAS) {
+
+                    // Velocidades
+                    scanf("%f", &velocidades[quantidade_amostras][0]);
+                    scanf("%f", &velocidades[quantidade_amostras][1]);
+
+                    // Sensores frontais
+                    scanf("%f", &sensores_frontais[quantidade_amostras][0]);
+                    scanf("%f", &sensores_frontais[quantidade_amostras][1]);
+                    scanf("%f", &sensores_frontais[quantidade_amostras][2]);
+
+                    // Sensores laterais
+                    scanf("%f", &sensores_laterais[quantidade_amostras][0]);
+                    scanf("%f", &sensores_laterais[quantidade_amostras][1]);
+
+                    // Aumenta a quantidade de amostras
+                    quantidade_amostras++;
+                 }
+                
             break;
 
             //Processar e Exibir relatório
             case 3:
-                fusaoSensores(MAX_AMOSTRAS, sensores_frontais, processamento);
-                calcularDistanciaSegura(sensibilidade, atrito, MAX_AMOSTRAS, velocidades, processamento);
-                assistenteFaixa(MAX_AMOSTRAS, velocidades, sensores_laterais, status);
-                analiseRiscoFrontal(MAX_AMOSTRAS, velocidades, processamento, status);
-                exibirRelatorio(MAX_AMOSTRAS, velocidades, sensores_frontais, sensores_laterais, processamento, status);
+
+                if(quantidade_amostras > 0) {
+                fusaoSensores(quantidade_amostras, sensores_frontais, processamento);
+                calcularDistanciaSegura(sensibilidade, atrito, quantidade_amostras, velocidades, processamento);
+                assistenteFaixa(quantidade_amostras, velocidades, sensores_laterais, status);
+                analiseRiscoFrontal(quantidade_amostras, velocidades, processamento, status);
+                exibirRelatorio(quantidade_amostras, velocidades, sensores_frontais, sensores_laterais, processamento, status);
             break;
+
+                }
 
             //Sair
             case 4:
@@ -238,10 +265,10 @@ void carregarDados(int n, float velocidades[n][2], float sensores_frontais [n][3
         // Registros de sensores laterais
 
         //Faixa Esquerda entre 0.20 e 1.50 metros
-        sensores_laterais[i][0] = (rand() % 131) / 100 + 0.20;
+        sensores_laterais[i][0] = (rand() % 131) / 100.0 + 0.20;
 
         //Faixa Direita entre 0.20 e 1.50 metros
-        sensores_laterais[i][0] = (rand() % 131) / 100 + 0.20;
+        sensores_laterais[i][1] = (rand() % 131) / 100.0 + 0.20;
 
         // Matriz de processamento
         processamento[i][0] = 0.0;
@@ -275,13 +302,13 @@ void analiseRiscoFrontal(int n, float velocidades[n][2], float processamento[n][
         } 
         else {
         //Status 2 - Risco de Colisão
-            status[i][0] = 3;
+            status[i][0] = 2;
         }
     }
 }
 
 //Função que exibe o relatório final
-void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][3], float sensores_laterais[n][2], float processamento[n][2], float status[n][3]){
+void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][3], float sensores_laterais[n][2], float processamento[n][2], int status[n][3]){
     int i = 0;
 
     //Imprime os dados de entrada
@@ -290,7 +317,7 @@ void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][
 
         //Matriz velocidades
         printf("Velocidade atual: %.1f km/h\n", velocidades[i][0]);
-        pritnf("Velocidade do veículo à frente: %.1f km/h\n", velocidades[i][1]);
+        printf("Velocidade do veículo à frente: %.1f km/h\n", velocidades[i][1]);
 
         //Matriz sensores frontais
         pritnf("Leitura do Radar: %.1f m\n", sensores_frontais[i][0]);
