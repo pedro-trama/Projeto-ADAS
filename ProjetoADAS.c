@@ -19,6 +19,12 @@ void fusaoSensores(int n, float sensores[n][3], float process[n][2]);
 //Função que calcula a distancia de frenagem para cada amostra
 void calcularDistanciaSegura(int sens, float atrito, int n, float velocidades[n][2], float process[n][2]);
 
+//Função qua analisa as faixas esquerda e direita
+void assistenteFaixa(int n, float velocidades[n][2], float sensores_laterais[n][2], int status[n][3]);
+
+//Função que inicializa as matrizes com 50 registros aleatórios
+void carregarDados(int n, float velocidades[n][2], float sensores_frontais [n][3], float sensores_laterais[n][2], float processamento[n][2], int status[n][3]);
+
 int main(){
     
     //Variáveis
@@ -65,6 +71,8 @@ int main(){
         switch (op){
             //Carregar dados
             case 1:
+                carregarDados(REGISTROS, velocidades, sensores_frontais, sensores_laterais, processamento, status);
+                assistenteFaixa(REGISTROS, velocidades, sensores_laterais, status);
             break;
 
             //Inserir nova amostra
@@ -142,3 +150,96 @@ void calcularDistanciaSegura(int sens, float atrito, int n, float velocidades[n]
         process[i][1] = distancia;
     } 
 }  
+
+//Funçaõ Assistente de Faixa Dinâmico
+
+void assistenteFaixa(int n, float velocidades[n][2], float sensores_laterais[n][2], int status[n][3]) {
+    int i;
+    float margem; // Margem mínima de segurança
+
+    //Percorre por todas as amostras de velocidade
+    for (i = 0; i < n; i++) {
+        margem = 0.50;
+        if (velocidades[i][0] > 80.0) {
+            // Cálculo da margem mínima de segurança com a soma de margem exigida quando velocidade > 80.0
+            margem = margem + (velocidades[i][0] - 80.0) * 0.01; 
+        }
+// Avaliação da Faixa Esquerda
+        if (sensores_laterais[i][0] < margem) {
+
+            //Perigo de invasão
+            status[i][1] = 2;
+        }
+        else if (sensores_laterais[i][0] < margem + 0.20) {
+
+            //Atenção
+            status[i][1] = 1;
+        }
+        else {
+
+        //Situação normal
+        status[i][1] = 0;
+        }
+
+// Avaliação da Faixa Direita
+        if (sensores_laterais[i][1] < margem) {
+
+            //Perigo de invasão
+            status[i][2] = 2;
+        }
+        else if (sensores_laterais[i][1] < margem + 0.20) {
+
+            //Atenção
+            status[i][2] = 1;
+        }
+        else {
+
+        //Situação normal
+        status[i][2] = 0;
+        }
+
+// Função que carrega os 50 registros aleatórios
+
+void carregarDados(int n, float velocidades[n][2], float sensores_frontais [n][3], float sensores_laterais[n][2], float processamento[n][2], int status[n][3]) {
+    int i;
+
+    //Percorre os 50 registros
+    for (i = 0; i < n; i++) {
+
+        // Registros das velocidades
+
+        //Velocidade atual entre 30 km/h e 120 km/h
+        velocidades[i][0] = rand() % 91 + 30;
+
+        //Velocidade do veículo à frente entre 30 km/h e 120 km/h
+        velocidades[i][1] = rand() % 91 + 30;
+
+        // Registros de sensores frontais
+
+        //Radar entre 5 e 50 metros
+        sensores_frontais[i][0] = rand() % 46 + 5.0;
+
+        //Lidar entre 5 e 50 metros
+        sensores_frontais[i][1] = rand() % 46 + 5.0;
+
+        //Câmera entre 5 e 50 metros
+        sensores_frontais[i][2] = rand() % 46 + 5.0;
+
+        // Registros de sensores laterais
+
+        //Faixa Esquerda entre 0.20 e 1.50 metros
+        sensores_laterais[i][0] = (rand() % 131) / 100 + 0.20;
+
+        //Faixa Direita entre 0.20 e 1.50 metros
+        sensores_laterais[i][0] = (rand() % 131) / 100 + 0.20;
+
+        // Matriz de processamento
+        processamento[i][0] = 0.0;
+        processamento[i][1] = 0.0;
+
+        // Matriz de status
+        status[i][0] = 0;
+        status[i][1] = 0;
+        status[i][2] = 0;
+    }
+}
