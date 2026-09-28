@@ -14,17 +14,24 @@ Turma: 02D11
 //Protótipo das funções
 
 //Função que recebe a matriz de sensores frontais e extrai a mediana
-void fusaoSensores(int n, float sensores[n][3], float process[n][2]);
+void fusaoSensores(int n, float sensores_frontais[n][3], float processamento[n][2]);
 
 //Função que calcula a distancia de frenagem para cada amostra
-void calcularDistanciaSegura(int sens, float atrito, int n, float velocidades[n][2], float process[n][2]);
+void calcularDistanciaSegura(int sens, float atrito, int n, float velocidades[n][2], float processamento[n][2]);
 
 //Função qua analisa as faixas esquerda e direita
 void assistenteFaixa(int n, float velocidades[n][2], float sensores_laterais[n][2], int status[n][3]);
 
 //Função que inicializa as matrizes com 50 registros aleatórios
-void carregarDados(int n, float velocidades[n][2], float sensores_frontais [n][3], float sensores_laterais[n][2], float processamento[n][2], int status[n][3]);
+void carregarDados(int n, float velocidades[n][2], float sensores_frontais[n][3], float sensores_laterais[n][2], float processamento[n][2], int status[n][3]);
 
+//Função que compara a velocidade relativa e verifica se há risco de colisão
+void analiseRiscoFrontal(int n, float velocidades[n][2], float processamento[n][2], int status[n][3]);
+
+//Função que exibe o relatório
+void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][3], float sensores_laterais[n][2], float processamento[n][2], float status[n][3]);
+
+//Função principal do programa
 int main(){
     
     //Variáveis
@@ -79,8 +86,13 @@ int main(){
             case 2:
             break;
 
-            //Exibir relatório
+            //Processar e Exibir relatório
             case 3:
+                fusaoSensores(MAX_AMOSTRAS, sensores_frontais, processamento);
+                calcularDistanciaSegura(sensibilidade, atrito, MAX_AMOSTRAS, velocidades, processamento);
+                assistenteFaixa(MAX_AMOSTRAS, velocidades, sensores_laterais, status);
+                analiseRiscoFrontal(MAX_AMOSTRAS, velocidades, processamento, status);
+                exibirRelatorio(MAX_AMOSTRAS, velocidades, sensores_frontais, sensores_laterais, processamento, status);
             break;
 
             //Sair
@@ -151,8 +163,7 @@ void calcularDistanciaSegura(int sens, float atrito, int n, float velocidades[n]
     } 
 }  
 
-//Funçaõ Assistente de Faixa Dinâmico
-
+//Função Assistente de Faixa Dinâmico
 void assistenteFaixa(int n, float velocidades[n][2], float sensores_laterais[n][2], int status[n][3]) {
     int i;
     float margem; // Margem mínima de segurança
@@ -197,9 +208,8 @@ void assistenteFaixa(int n, float velocidades[n][2], float sensores_laterais[n][
         //Situação normal
         status[i][2] = 0;
         }
-
+    }
 // Função que carrega os 50 registros aleatórios
-
 void carregarDados(int n, float velocidades[n][2], float sensores_frontais [n][3], float sensores_laterais[n][2], float processamento[n][2], int status[n][3]) {
     int i;
 
@@ -241,5 +251,105 @@ void carregarDados(int n, float velocidades[n][2], float sensores_frontais [n][3
         status[i][0] = 0;
         status[i][1] = 0;
         status[i][2] = 0;
+    }
+}
+
+//Função Análise de Risco Frontal
+void analiseRiscoFrontal(int n, float velocidades[n][2], float processamento[n][2], int status[n][3]){
+    int i;
+    float vel_relativa;
+
+    //Percorre a matriz velocidades e calcula a velocidade relativa
+    for (i = 0; i < n; i ++){
+        vel_relativa = velocidades[i][0] - velocidades[i][1];
+
+        //Percorre a matriz processamento e compara a distância validada com a distância segura em caso de aproximação
+
+        //Status 0 - Seguro
+        if (vel_relativa <= 0 || processamento[i][0] >= processamento[i][1]){
+            status[i][0] = 0;
+        }
+        //Status 1 - Atenção
+        else if(processamento[i][0] < processamento[i][1] && processamento[i][0] >= (0.5 * processamento[i][1])){
+            status[i][0] = 1;
+        } 
+        else {
+        //Status 2 - Risco de Colisão
+            status[i][0] = 3;
+        }
+    }
+}
+
+//Função que exibe o relatório final
+void exibirRelatorio(int n, float velocidades[n][2], float sensores_frontais[n][3], float sensores_laterais[n][2], float processamento[n][2], float status[n][3]){
+    int i = 0;
+
+    //Imprime os dados de entrada
+    for (i = 0; i < n; i++){
+        printf("========== AMOSTRA %d ==========", i);
+
+        //Matriz velocidades
+        printf("Velocidade atual: %.1f km/h\n", velocidades[i][0]);
+        pritnf("Velocidade do veículo à frente: %.1f km/h\n", velocidades[i][1]);
+
+        //Matriz sensores frontais
+        pritnf("Leitura do Radar: %.1f m\n", sensores_frontais[i][0]);
+        printf("Leitura do Lidar: %.1f m\n", sensores_frontais[i][1]);
+        printf("Leitura da Câmera: %.1f m/\n", sensores_frontais[i][2]);
+
+        //Matriz sensores laterais
+        printf("Distância da faixa esquerda: %.1f m\n", sensores_laterais[i][0]);
+        printf("Distância da faixa direita: %.1f m\n", sensores_laterais[i][1]);
+
+        //Matriz processamento
+        printf("Distância validada: %.1f m\n", processamento[i][0]);
+        printf("Distância segura exigida: %.1f m\n", processamento[i][1]);
+
+        //Matris status
+        //Status frontal
+        if (status[i][0] == 1){
+            printf("Status: SEGURO\n");
+        } 
+        else if (status[i][0] == 2){
+            printf("Status: ATENÇÃO\n");
+        } 
+        else {
+            printf("Status: RISCO DE COLISÃO (AEB ACIONADO)\n");
+        }
+
+        //Faixas esquerda e direita
+
+        //Faixa esquerda
+        if (status[i][1] == 0){
+            printf("Faixa Esquerda: NORMAL\n");
+        } 
+        else if(status[i][1] == 1){
+            printf("Faixa Esquerda: ATENÇÃO\n");
+        } 
+        else {
+            printf("Faixa Esquerda: PERIGO DE INVASÃO\n");
+        }
+
+        //Faixa direita
+        if (status[i][2] == 0){
+            printf("Faixa Direita: NORMAL\n");
+        } 
+        else if (status[i][2] == 1){
+            printf("Faixa Direita: ATENÇÃO\n");
+        } 
+        else {
+            printf("Faixa Direita: PERIGO DE INVASÃO\n");
+        }
+
+        //Decisão Geral do Sistema
+        if ((status[i][0] == 2) || (status[i][1] == 2) || (status[i][2] == 2)){
+            printf("STATUS GERAL: INTERVENÇÃO CRIÍTICA EXIGIDA\n");
+        } 
+        else if ((status[i][0] == 1) || (status[i][1] == 1) || (status[i][2] == 1)){
+            printf("STATUS GERAL: ATENÇÃO\n");
+        }
+        else {
+            printf("STATUS GERAL: NORMAL\n");
+        }
     }
 }
